@@ -1,14 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"log"
+	"url-crawler/internal/server"
 )
 
 func main() {
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintln(w, "Backend is up and running!")
-	})
-	fmt.Println("Server running at http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	cfg := server.Config{
+		Port:    "8080",
+		Timeout: 30,
+	}
+
+	srv := server.NewServer(cfg)
+	log.Printf("Server starting on :%s", cfg.Port)
+	log.Fatal(srv.Start())
 }
