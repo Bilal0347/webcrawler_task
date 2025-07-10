@@ -2,12 +2,17 @@ package main
 
 import (
 	"log"
+	"os"
+	"url-crawler/internal/db"
 	"url-crawler/internal/server"
 )
 
 func main() {
+	db.LoadEnvVariables()
+	db.InitDatabase()
+
 	cfg := server.Config{
-		Port:    "8080",
+		Port:    os.Getenv("PORT"),
 		Timeout: 30,
 	}
 

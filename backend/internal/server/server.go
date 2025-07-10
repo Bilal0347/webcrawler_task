@@ -1,9 +1,10 @@
 package server
 
 import (
-	"url-crawler/internal/handlers"
+	"url-crawler/internal/api"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/cors"
 )
 
 type Config struct {
@@ -20,37 +21,30 @@ func NewServer(cfg Config) *Server {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type"},
+		AllowCredentials: true,
+	}))
+
 	s := &Server{
 		router: r,
 		config: cfg,
 	}
 
 	s.setupRoutes()
-	s.setupMiddleware()
 	return s
 }
 
 func (s *Server) setupRoutes() {
-	crawlHandler := handlers.NewCrawlHandler(s.config.Timeout)
+	crawlHandler := api.NewCrawlHandler(s.config.Timeout)
 	s.router.POST("/crawl", crawlHandler.HandleCrawlRequest)
+	s.router.GET("/crawl", crawlHandler.GetCrawlResults)
 
 	// Health check endpoint
 	s.router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
-	})
-}
-
-func (s *Server) setupMiddleware() {
-	s.router.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Type")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-		c.Next()
 	})
 }
 
