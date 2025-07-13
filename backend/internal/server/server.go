@@ -22,8 +22,8 @@ func NewServer(cfg Config) *Server {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type"},
 		AllowCredentials: true,
 	}))
@@ -39,6 +39,15 @@ func NewServer(cfg Config) *Server {
 
 func (s *Server) setupRoutes() {
 	crawlHandler := api.NewCrawlHandler(s.config.Timeout)
+	
+	// URL Management APIs
+	s.router.POST("/urls", crawlHandler.AddURLToDB)                    // Add URL to DB
+	s.router.POST("/urls/crawl", crawlHandler.RunCrawler)              // Run crawler for URL
+	s.router.GET("/urls", crawlHandler.GetCrawlResults)                // Get all URLs
+	s.router.DELETE("/urls/:id", crawlHandler.DeleteURL)               // Delete single URL
+	s.router.DELETE("/urls", crawlHandler.DeleteMultipleURLs)          // Delete multiple URLs
+	
+	// Legacy APIs (for backward compatibility)
 	s.router.POST("/crawl", crawlHandler.HandleCrawlRequest)
 	s.router.GET("/crawl", crawlHandler.GetCrawlResults)
 
