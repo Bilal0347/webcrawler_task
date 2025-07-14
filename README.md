@@ -1,4 +1,4 @@
-# Sykell Web Crawler Dashboard
+# Web Crawler Dashboard
 
 A modern, full-stack web crawler dashboard built with React (Vite, Tailwind CSS, shadcn/ui) and Go (Gin, GORM, MySQL). Easily manage, crawl, and analyze URLs with a beautiful, responsive UI and robust backend APIs.
 
